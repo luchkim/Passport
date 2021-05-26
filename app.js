@@ -8,7 +8,15 @@ const HOST = "mongodb://127.0.0.1";
 // const HOST = "mongodb://mongo-server"
 
 const initializePassport = require('./passport');
-initializePassport(passport)
+
+initializePassport(passport, async (email)=>{
+    let user = await findUser(email);
+    
+    console.log(user);
+
+    return user;
+})
+
 
 const DB = 'passport';
 const COLLECTION = 'users';
@@ -65,6 +73,25 @@ async function insertData(name, email, hash){
     await client.close();
 }
 
+
+async function findUser(email){
+    const client = mongodb.MongoClient(HOST, {useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+
+    try{
+        const db = client.db(DB);
+        const collection = db.collection(COLLECTION);
+        
+        const product = await collection.findOne({email: email});
+        return product;
+    }
+    catch(err){
+        console.log('Insert Product catch=>', err)
+    }
+    finally{
+        await client.close();
+    }
+}
 
 
 
